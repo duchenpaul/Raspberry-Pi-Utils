@@ -55,11 +55,60 @@ int _rst = 4;
 int _cs = 3;
 
 // lcd contrast
-int contrast = 50;
+int contrast = 45;
+
+// concatenate any number of strings
+#include <stdarg.h>       // va_*
+
+char* concat(int count, ...)
+{
+    va_list ap;
+    int i;
+
+    // Find required length to store merged string
+    int len = 1; // room for NULL
+    va_start(ap, count);
+    for(i=0 ; i<count ; i++)
+        len += strlen(va_arg(ap, char*));
+    va_end(ap);
+
+    // Allocate memory to concat strings
+    char *merged = calloc(sizeof(char),len);
+    int null_pos = 0;
+
+    // Actually concatenate strings
+    va_start(ap, count);
+    for(i=0 ; i<count ; i++)
+    {
+        char *s = va_arg(ap, char*);
+        strcpy(merged+null_pos, s);
+        null_pos += strlen(s);
+    }
+    va_end(ap);
+
+    return merged;
+}
 
 //int main (void)
 int main(int argc, char *argv[])
 {
+  // check wiringPi setup
+  if (wiringPiSetup() == -1)
+  {
+  printf("wiringPi-Error\n");
+    exit(1);
+  }
+
+  // init and clear lcd
+  LCDInit(_sclk, _din, _dc, _cs, _rst, contrast);
+  LCDclear();
+
+  // get system usage / info
+  struct sysinfo sys_info;
+  if(sysinfo(&sys_info) != 0)
+  {
+      printf("sysinfo-Error\n");
+  }
 
   if (argc > 3)
   {
@@ -70,6 +119,7 @@ int main(int argc, char *argv[])
   int i;
   char *command;
   char *output;
+  char *file_path;
 
   output = argv[1];
 
@@ -93,6 +143,7 @@ int main(int argc, char *argv[])
                   printf("\t-h: show this help on usage & options\n");
                   printf("\t-i: show IP address\n");
                   printf("\t-d: show datetime\n");
+                  printf("\t-f <file_path>: show the content if the file\n");
                   output = "";
                   break;
 
@@ -100,8 +151,32 @@ int main(int argc, char *argv[])
                           break;
 
               case 'd':
+                for (;;)
+                {
                   command = "date";
                   output = getCommandLineOutput(command);
+                  LCDclear();
+
+                  LCDdrawstring(0, 0, output);
+                  LCDdisplay();
+                  delay(100);
+                }
+
+                  break;
+
+              case 'f':
+                file_path = argv[2];
+                command = concat(2,"cat ",file_path);
+                for (;;)
+                {
+                  output = getCommandLineOutput(command);
+                  LCDclear();
+
+                  LCDdrawstring(0, 0, output);
+                  LCDdisplay();
+                  delay(100);
+                }
+
                   break;
 
               default:
@@ -111,24 +186,6 @@ int main(int argc, char *argv[])
 
           }
       }
-  }
-
-  // check wiringPi setup
-  if (wiringPiSetup() == -1)
-  {
-	printf("wiringPi-Error\n");
-    exit(1);
-  }
-
-  // init and clear lcd
-  LCDInit(_sclk, _din, _dc, _cs, _rst, contrast);
-  LCDclear();
-
-  // get system usage / info
-  struct sysinfo sys_info;
-  if(sysinfo(&sys_info) != 0)
-  {
-      printf("sysinfo-Error\n");
   }
 
   // build screen
