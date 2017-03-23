@@ -870,19 +870,39 @@ char *getIPAddress()
     return buf;
 }
 
+// char *getCommandLineOutput(char *command)
+// {
+//   FILE *pf;
+//   static char result[255];
+//   pf = popen(command,"r");
+//   if(!pf) {
+//       sprintf(result, "Error opening pipe: %s\n", stderr);
+//   }
+//   fgets(result, 255 , pf);
+//   if (pclose(pf) == -1) {
+//       sprintf(result," Error: %s\n", stderr);
+//   }
+
+//   printf("result=%s\n", result);
+//   return result;
+// };
+
 char *getCommandLineOutput(char *command)
 {
-  FILE *pf;
-  static char result[255];
-  pf = popen(command,"r");
-  if(!pf) {
-      sprintf(result, "Error opening pipe: %s\n", stderr);
-  }
-  fgets(result, 255 , pf);
-  if (pclose(pf) == -1) {
-      sprintf(result," Error: %s\n", stderr);
-  }
+	FILE *fp;
 
-  return result;
+	static char result[255];
+	/* Open the command for reading. */
+	fp = popen(command, "r");
+	if (fp == NULL) {
+	  printf("Failed to run command\n" );
+	}
+	/* Read the output a line at a time - output it. */
+	while (fgets(result, 255, fp) != NULL) {
+	 	printf("%s", result);
+	}
+	/* close */
+	pclose(fp);
+	printf("%s", result);
+	return result;
 };
-
