@@ -898,11 +898,14 @@ char *getCommandLineOutput(char *command)
 	  printf("Failed to run command\n" );
 	}
 	/* Read the output a line at a time - output it. */
-	while (fgets(result, 255, fp) != NULL) {
-	 	printf("%s", result);
+	// while (fgets(result, 255, fp) != NULL) {
+	//  	printf("%s", result);
+	// }
+	fgets(result, 255, fp);
+	if (pclose(fp) == -1) {
+	    sprintf(result," Error: %s\n", stderr);
 	}
-	/* close */
-	pclose(fp);
-	printf("%s", result);
+
+	// printf("%s", result);
 	return result;
 };
