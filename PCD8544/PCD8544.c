@@ -902,9 +902,10 @@ char *getCommandLineOutput(char *command)
 	//  	printf("%s", result);
 	// }
 	fgets(result, 255, fp);
-	if (pclose(fp) == -1) {
-	    sprintf(result," Error: %s\n", stderr);
-	}
+	// fgets(result, 255, fp);
+	// if (pclose(fp) == -1) {
+	//     sprintf(result," Error: %s\n", stderr);
+	// }
 
 	// printf("%s", result);
 	return result;
