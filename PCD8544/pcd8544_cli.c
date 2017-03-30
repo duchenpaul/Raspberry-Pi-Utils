@@ -120,6 +120,8 @@ int main(int argc, char *argv[])
   char *command;
   char *output;
   char *file_path;
+  char *file_content_buffer = NULL;
+
 
   output = argv[1];
 
@@ -166,13 +168,20 @@ int main(int argc, char *argv[])
 
               case 'f':
                 file_path = argv[2];
-                command = concat(2,"cat ",file_path);
+                size_t size = 0;
                 for (;;)
                 {
-                  output = getCommandLineOutput(command);
+                  size = 0;
+                  FILE *fp = fopen(file_path, "r");
+                  fseek(fp, 0, SEEK_END); 
+                  size = ftell(fp);
+                  rewind(fp);
+                  file_content_buffer = malloc((size + 1) * sizeof(*file_content_buffer));
+                  fread(file_content_buffer, size, 1, fp);
+                  file_content_buffer[size] = '\0';
+  
                   LCDclear();
-
-                  LCDdrawstring(0, 0, output);
+                  LCDdrawstring(0, 0, file_content_buffer);
                   LCDdisplay();
                   delay(100);
                 }
